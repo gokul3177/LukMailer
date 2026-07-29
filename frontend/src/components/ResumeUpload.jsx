@@ -22,7 +22,7 @@ export default function ResumeUpload({ onResumeParsed }) {
     formData.append('file', file);
 
     try {
-      const res = await fetch('http://localhost:8000/api/parse-resume', {
+      const res = await fetch('/api/parse-resume', {
         method: 'POST',
         body: formData,
       });

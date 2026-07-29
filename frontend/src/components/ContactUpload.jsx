@@ -25,7 +25,7 @@ export default function ContactUpload({ onContactsParsed }) {
     formData.append('verify_existence', verifyExistence);
 
     try {
-      const res = await fetch('http://localhost:8000/api/parse-hr-list', {
+      const res = await fetch('/api/parse-hr-list', {
         method: 'POST',
         body: formData,
       });

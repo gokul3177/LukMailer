@@ -43,7 +43,7 @@ export default function App() {
   // Connect to backend SSE Log Stream
   useEffect(() => {
     checkHealth();
-    const eventSource = new EventSource('http://localhost:8000/api/stream-logs');
+    const eventSource = new EventSource('/api/stream-logs');
 
     eventSource.onmessage = (event) => {
       try {
@@ -86,7 +86,7 @@ export default function App() {
 
   const checkHealth = async () => {
     try {
-      const res = await fetch('http://localhost:8000/api/health');
+      const res = await fetch('/api/health');
       if (res.ok) setApiConnected(true);
     } catch {
       setApiConnected(false);
@@ -152,7 +152,7 @@ export default function App() {
     formData.append('dry_run', dryRun);
 
     try {
-      const res = await fetch('http://localhost:8000/api/start-campaign', {
+      const res = await fetch('/api/start-campaign', {
         method: 'POST',
         body: formData,
       });
@@ -169,7 +169,7 @@ export default function App() {
 
   const handleStopCampaign = async () => {
     try {
-      await fetch('http://localhost:8000/api/stop-campaign', { method: 'POST' });
+      await fetch('/api/stop-campaign', { method: 'POST' });
       addLog('Cancellation requested by user...');
     } catch (err) {
       console.error(err);
