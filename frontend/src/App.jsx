@@ -203,30 +203,38 @@ export default function App() {
                 <div className="card-title-icon">
                   <Rocket size={18} />
                 </div>
-                <span>Step 4: Campaign Action Controls</span>
+                <span>Launch Campaign</span>
               </div>
+              {contacts && contacts.length > 0 && (
+                <span style={{ fontSize: '0.8rem', fontWeight: 600, background: '#eff6ff', color: '#2563eb', border: '1px solid #bfdbfe', borderRadius: '20px', padding: '0.2rem 0.75rem' }}>
+                  {contacts.length} recipients ready
+                </span>
+              )}
             </div>
 
-            <div style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
-              <div style={{ marginBottom: '1.25rem', background: '#f8fafc', padding: '0.875rem 1rem', borderRadius: '8px', border: '1px solid #e2e8f0' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.625rem' }}>
-                  <input
-                    type="checkbox"
-                    id="dryrun-check"
-                    checked={dryRun}
-                    onChange={(e) => setDryRun(e.target.checked)}
-                    disabled={isSending}
-                    style={{ cursor: 'pointer' }}
-                  />
-                  <label htmlFor="dryrun-check" style={{ fontWeight: 600, fontSize: '0.875rem', cursor: 'pointer', color: '#1e293b' }}>
-                    Dry Run Mode (Simulate send without actual emails)
-                  </label>
-                </div>
-                <p style={{ fontSize: '0.75rem', color: '#64748b', marginTop: '0.25rem', marginLeft: '1.5rem' }}>
-                  Safe test mode. Validates execution steps without contacting SMTP servers.
-                </p>
-              </div>
+            <div style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center', gap: '1rem' }}>
 
+              {/* Dry Run Toggle */}
+              <label htmlFor="dryrun-check" style={{ display: 'flex', alignItems: 'flex-start', gap: '0.75rem', background: dryRun ? '#fefce8' : '#f8fafc', padding: '0.875rem 1rem', borderRadius: '8px', border: `1px solid ${dryRun ? '#fde68a' : '#e2e8f0'}`, cursor: 'pointer', transition: 'all 0.2s' }}>
+                <input
+                  type="checkbox"
+                  id="dryrun-check"
+                  checked={dryRun}
+                  onChange={(e) => setDryRun(e.target.checked)}
+                  disabled={isSending}
+                  style={{ cursor: 'pointer', marginTop: '2px', flexShrink: 0 }}
+                />
+                <div>
+                  <div style={{ fontWeight: 600, fontSize: '0.875rem', color: '#1e293b' }}>
+                    🧪 Test Mode (no emails sent)
+                  </div>
+                  <div style={{ fontSize: '0.75rem', color: '#64748b', marginTop: '0.2rem' }}>
+                    Runs everything — but skips the actual sending. Use this first to make sure it all works.
+                  </div>
+                </div>
+              </label>
+
+              {/* Action Button */}
               {!isSending ? (
                 <button
                   className="btn btn-primary"
@@ -234,7 +242,8 @@ export default function App() {
                   onClick={handleStartCampaign}
                   disabled={!contacts || contacts.length === 0}
                 >
-                  <Play size={20} /> Start Sending Campaign
+                  <Play size={20} />
+                  {dryRun ? 'Run Test Campaign' : 'Start Sending Emails'}
                 </button>
               ) : (
                 <button
@@ -242,12 +251,18 @@ export default function App() {
                   style={{ width: '100%', padding: '0.875rem', fontSize: '1rem' }}
                   onClick={handleStopCampaign}
                 >
-                  <Square size={20} /> Stop Campaign Execution
+                  <Square size={20} /> Stop Campaign
                 </button>
               )}
 
+              {!contacts || contacts.length === 0 ? (
+                <p style={{ fontSize: '0.78rem', color: '#94a3b8', textAlign: 'center', margin: 0 }}>
+                  ⬆ Upload your HR contact list first to enable sending
+                </p>
+              ) : null}
+
               {errorMessage && (
-                <div style={{ marginTop: '1rem', color: '#dc2626', fontSize: '0.85rem', display: 'flex', alignItems: 'center', gap: '0.375rem', background: '#fef2f2', padding: '0.625rem', borderRadius: '8px', border: '1px solid #fecaca' }}>
+                <div style={{ color: '#dc2626', fontSize: '0.85rem', display: 'flex', alignItems: 'center', gap: '0.375rem', background: '#fef2f2', padding: '0.625rem', borderRadius: '8px', border: '1px solid #fecaca' }}>
                   <AlertCircle size={16} />
                   <span>{errorMessage}</span>
                 </div>
