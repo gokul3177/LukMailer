@@ -21,7 +21,7 @@ class CampaignCancelledException(Exception):
     pass
 
 class GmailSender:
-    def __init__(self, address: str, app_password: str, sender_name: str = "Gokulakannan B S"):
+    def __init__(self, address: str, app_password: str, sender_name: str = ""):
         self.address = address.strip()
         self.app_password = app_password.strip()
         self.sender_name = sender_name.strip()
