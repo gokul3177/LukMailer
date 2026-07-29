@@ -26,66 +26,80 @@ def _domain_to_company(email: str) -> str:
 
 def parse_csv_file(file_content: bytes) -> list[tuple[str | None, str | None, str]]:
     """
-    Parses CSV content. Supports headers like 'email', 'company', 'name', 'hr_name'
-    or raw columns (company|hr_name|email or first|last|email).
-    Returns list of raw tuples (company, hr_name, email).
+    Parses CSV content with robust line-ending normalization and fallback regex parsing.
+    Prevents 'new-line character seen in unquoted field' errors.
     """
     text = file_content.decode("utf-8", errors="replace")
-    stream = io.StringIO(text)
+    # Normalize all line-endings to standard LF
+    clean_text = text.replace("\r\n", "\n").replace("\r", "\n")
     
     # Check if pipe separated or comma separated
-    sample = text[:1024]
+    sample = clean_text[:1024]
     delimiter = "|" if "|" in sample and "," not in sample else ","
     
-    reader = csv.reader(stream, delimiter=delimiter)
     raw_contacts = []
     
-    header = None
-    for row in reader:
-        if not row or not any(row):
-            continue
-        row_str = [cell.strip() for cell in row]
+    try:
+        stream = io.StringIO(clean_text, newline="")
+        reader = csv.reader(stream, delimiter=delimiter)
         
-        # Check if first row is header
-        if header is None and any(col.lower() in ("email", "e-mail", "company", "hr", "name") for col in row_str):
-            header = [col.lower() for col in row_str]
-            continue
+        header = None
+        for row in reader:
+            if not row or not any(row):
+                continue
+            row_str = [cell.strip() for cell in row]
             
-        if header:
-            # Column mapping
-            email, company, hr_name = None, None, None
-            for idx, col_name in enumerate(header):
-                if idx >= len(row_str):
-                    continue
-                val = row_str[idx]
-                if "email" in col_name or "e-mail" in col_name:
-                    email = val
-                elif "company" in col_name or "organization" in col_name:
-                    company = val
-                elif "name" in col_name or "hr" in col_name or "recruiter" in col_name:
-                    hr_name = val
-            if email:
-                raw_contacts.append((company, hr_name, email))
-        else:
-            # Fallback based on column counts
-            if len(row_str) >= 3:
-                if "@" in row_str[2]:
-                    # first|last|email or company|name|email
-                    if "@" not in row_str[0]:
+            # Check if first row is header
+            if header is None and any(col.lower() in ("email", "e-mail", "company", "hr", "name") for col in row_str):
+                header = [col.lower() for col in row_str]
+                continue
+                
+            if header:
+                # Column mapping
+                email, company, hr_name = None, None, None
+                for idx, col_name in enumerate(header):
+                    if idx >= len(row_str):
+                        continue
+                    val = row_str[idx]
+                    if "email" in col_name or "e-mail" in col_name:
+                        email = val
+                    elif "company" in col_name or "organization" in col_name:
+                        company = val
+                    elif "name" in col_name or "hr" in col_name or "recruiter" in col_name:
+                        hr_name = val
+                if email:
+                    raw_contacts.append((company, hr_name, email))
+            else:
+                # Fallback based on column counts
+                if len(row_str) >= 3:
+                    if "@" in row_str[2]:
                         c_or_f = row_str[0]
                         last = row_str[1]
                         hr = f"{c_or_f} {last}".strip() if last else c_or_f
                         raw_contacts.append((None, hr, row_str[2]))
-                elif "@" in row_str[0]:
-                    raw_contacts.append((row_str[1], row_str[2], row_str[0]))
-            elif len(row_str) == 2:
-                if "@" in row_str[1]:
-                    raw_contacts.append((None, row_str[0], row_str[1]))
-                elif "@" in row_str[0]:
-                    raw_contacts.append((None, row_str[1], row_str[0]))
-            elif len(row_str) == 1 and "@" in row_str[0]:
-                raw_contacts.append((None, None, row_str[0]))
-                
+                    elif "@" in row_str[0]:
+                        raw_contacts.append((row_str[1], row_str[2], row_str[0]))
+                elif len(row_str) == 2:
+                    if "@" in row_str[1]:
+                        raw_contacts.append((None, row_str[0], row_str[1]))
+                    elif "@" in row_str[0]:
+                        raw_contacts.append((None, row_str[1], row_str[0]))
+                elif len(row_str) == 1 and "@" in row_str[0]:
+                    raw_contacts.append((None, None, row_str[0]))
+    except Exception:
+        # Fallback line-by-line regex parsing if csv.reader encounters unquoted multiline formatting anomalies
+        lines = clean_text.splitlines()
+        for line in lines:
+            line_str = line.strip()
+            if not line_str:
+                continue
+            found_emails = EMAIL_REGEX_PATTERN.findall(line_str)
+            for email in found_emails:
+                parts = line_str.split(delimiter)
+                company = parts[0].strip() if len(parts) > 1 and "@" not in parts[0] else None
+                hr_name = parts[1].strip() if len(parts) > 2 and "@" not in parts[1] else None
+                raw_contacts.append((company, hr_name, email))
+
     return raw_contacts
 
 def parse_docx_file(file_content: bytes) -> list[tuple[str | None, str | None, str]]:

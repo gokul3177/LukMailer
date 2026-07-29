@@ -39,7 +39,7 @@ def test_email_generator():
     assert "Phone" in body2
 
 def test_csv_parser():
-    raw_csv = b"Company|HR Name|Email\nAmazon|Jane Doe|jane@amazon.com\nUber|John Smith|john@uber.com\n"
+    raw_csv = b"Company|HR Name|Email\r\nAmazon|Jane Doe|jane@amazon.com\r\nUber|John Smith|john@uber.com\r\n"
     contacts = parse_csv_file(raw_csv)
     assert len(contacts) == 2
     assert contacts[0][0] == "Amazon"
