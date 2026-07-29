@@ -123,6 +123,43 @@ python main.py --send
 
 ---
 
+## Deployment
+
+> ⚠️ **Vercel is NOT supported** for this app. LukMailer uses Server-Sent Events (SSE), background tasks, and long-running SMTP connections — none of which work on Vercel's 10-second serverless functions.
+
+### 🚀 Deploy on Railway (Recommended — Free)
+
+1. Push your repo to GitHub (already done!)
+2. Go to [railway.app](https://railway.app) → **New Project** → **Deploy from GitHub**
+3. Select `gokul3177/LukMailer`
+4. Railway auto-detects the `railway.toml` and runs the build + start commands
+5. Add environment variables if needed (optional — credentials are entered via the UI)
+6. Your app will be live at `https://lukmailer-production.up.railway.app`
+
+### 🌐 Deploy on Render (Alternative — Free)
+
+1. Go to [render.com](https://render.com) → **New Web Service**
+2. Connect GitHub repo `gokul3177/LukMailer`
+3. Render auto-detects `render.yaml`
+4. Click **Deploy** — done!
+
+### 💻 Run Locally
+
+```bash
+# Install Python dependencies
+pip install -r requirements.txt
+
+# Build the frontend
+cd frontend && npm install && npm run build && cd ..
+
+# Start the server
+uvicorn backend.api:app --host 0.0.0.0 --port 8000 --reload
+```
+
+Open: **http://localhost:8000**
+
+---
+
 ## Testing
 
 Run unit tests using pytest:
