@@ -8,11 +8,17 @@ __pycache__/
 *.pyo
 .pytest_cache/
 
-# Logs & Reports
+# Logs & Generated Reports
 send_log.txt
 send_log_*.txt
 verify_report.txt
 verify_report_*.txt
+
+# Personal data files — never commit these
+*.pdf
+*.csv
+contacts/
+getContacts.csv
 
 # Node / React
 node_modules/

@@ -21,9 +21,9 @@ PROBE_FROM = "verify@lukmailer.local"
 # Logging Settings
 DEFAULT_LOG_FILE = Path("send_log.txt")
 
-# Standard Sender Fallback Defaults
-DEFAULT_SENDER_NAME = "Gokulakannan B S"
-DEFAULT_SENDER_PHONE = "9444520998"
-DEFAULT_SENDER_LINKEDIN = "https://www.linkedin.com/in/bsgk/"
-DEFAULT_SENDER_GITHUB = "https://github.com/gokul3177"
-DEFAULT_SENDER_LEETCODE = "https://leetcode.com/u/gokul3177/"
+# Standard Sender Fallback Defaults (intentionally blank — filled by user via UI)
+DEFAULT_SENDER_NAME = ""
+DEFAULT_SENDER_PHONE = ""
+DEFAULT_SENDER_LINKEDIN = ""
+DEFAULT_SENDER_GITHUB = ""
+DEFAULT_SENDER_LEETCODE = ""

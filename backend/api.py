@@ -42,14 +42,14 @@ class PreviewRequest(BaseModel):
     hr_name: Optional[str] = "Hiring Manager"
     custom_subject: Optional[str] = None
     custom_body: Optional[str] = None
-    sender_name: Optional[str] = "Gokulakannan B S"
+    sender_name: Optional[str] = None
 
 class StartCampaignRequest(BaseModel):
     gmail_address: str
     gmail_app_password: str
     contacts: list[dict]
     resume_text: Optional[str] = ""
-    resume_filename: Optional[str] = "Gokul_resume.pdf"
+    resume_filename: Optional[str] = "resume.pdf"
     custom_subject: Optional[str] = None
     custom_body: Optional[str] = None
     dry_run: bool = False

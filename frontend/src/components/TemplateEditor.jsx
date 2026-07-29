@@ -6,26 +6,26 @@ export default function TemplateEditor({ customSubject, setCustomSubject, custom
   const [activeTab, setActiveTab] = useState('edit');
   const [preview, setPreview] = useState({ subject: '', body: '' });
 
-  const defaultSubject = "Application for Backend Engineering / AI-ML Role – Gokulakannan B S";
+  const defaultSubject = "Application for [Role] – [Your Name]";
   const defaultBody = `Dear Hiring Team,
 
-I am a final-year Computer Science undergraduate at SASTRA University looking for Backend Engineering or AI/ML roles at Amazon (available from Jan 2027 for internship / full-time).
+I am writing to express my strong interest in engineering opportunities at {company}. I am excited about {company}'s innovative work in the industry.
+
+[Write your introduction here — mention your current status, the role you are targeting, and your availability.]
 
 Key Highlights:
-- Amazon ML Summer School 2025: Selected nationally for advanced GenAI, LLM/RAG, and System Design training.
-- Core Projects: Engineered LukMatch (LLM semantic matching), LukBill (NLP medical invoice automation), and LukWealth (PostgreSQL, Docker, CI/CD).
-- Technical Core: Python, REST APIs, SQL (PostgreSQL, MySQL), NoSQL (MongoDB), Docker, AWS, Git.
-- Problem Solving: Solved 250+ DSA problems on LeetCode; Core Member of SASTRA Robotics Club.
+- [Achievement 1 — e.g., a certification, award, or academic distinction]
+- [Achievement 2 — e.g., a project you built and its impact]
+- [Achievement 3 — e.g., your core technical skills]
 
-I would love the opportunity to discuss how my technical skills align with engineering opportunities at Amazon. My resume is attached for your review.
+I would love the opportunity to discuss how my background aligns with your team's goals. My resume is attached for your review.
 
 Best regards,
-Gokulakannan B S
-Phone    : +91 9444520998
-LinkedIn : https://www.linkedin.com/in/bsgk/
-GitHub   : https://github.com/gokul3177
-LeetCode : https://leetcode.com/u/gokul3177/
-Email    : gokulakannanbs31@gmail.com`;
+[Your Name]
+Phone    : [Your Phone Number]
+LinkedIn : [Your LinkedIn URL]
+GitHub   : [Your GitHub URL]
+Email    : [Your Email Address]`;
 
   useEffect(() => {
     fetchPreview();

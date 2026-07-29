@@ -105,12 +105,12 @@ def build_email_template(
     Builds (subject, plain_text_body) for a recruiter contact.
     """
     merged = {
-        "name": DEFAULT_SENDER_NAME,
-        "phone": DEFAULT_SENDER_PHONE,
-        "linkedin": DEFAULT_SENDER_LINKEDIN,
-        "github": DEFAULT_SENDER_GITHUB,
-        "leetcode": DEFAULT_SENDER_LEETCODE,
-        "email": "gokulakannanbs31@gmail.com",
+        "name": DEFAULT_SENDER_NAME or "Your Name",
+        "phone": DEFAULT_SENDER_PHONE or "",
+        "linkedin": DEFAULT_SENDER_LINKEDIN or "",
+        "github": DEFAULT_SENDER_GITHUB or "",
+        "leetcode": DEFAULT_SENDER_LEETCODE or "",
+        "email": "",
     }
     if sender_info:
         merged.update({k: v for k, v in sender_info.items() if v})
@@ -137,25 +137,32 @@ def build_email_template(
             .replace("{sender_leetcode}", s.get("leetcode", "")) \
             .replace("{sender_email}", s.get("email", ""))
     else:
+        highlight = get_company_highlight(company_clean)
         body = f"""{greeting}
 
-I am a final-year Computer Science undergraduate at SASTRA University looking for Backend Engineering or AI/ML roles at {company_clean} (available from Jan 2027 for internship / full-time).
+I am writing to express my interest in engineering opportunities at {company_clean}. I am excited about {highlight}.
+
+[Write your introduction and key highlights here. Describe your background, skills, and what makes you a strong candidate.]
 
 Key Highlights:
-- Amazon ML Summer School 2025: Selected nationally for advanced GenAI, LLM/RAG, and System Design training.
-- Core Projects: Engineered LukMatch (LLM semantic matching), LukBill (NLP medical invoice automation), and LukWealth (PostgreSQL, Docker, CI/CD).
-- Technical Core: Python, REST APIs, SQL (PostgreSQL, MySQL), NoSQL (MongoDB), Docker, AWS, Git.
-- Problem Solving: Solved 250+ DSA problems on LeetCode; Core Member of SASTRA Robotics Club.
+- [Highlight 1 — e.g., a major achievement or certification]
+- [Highlight 2 — e.g., a key project you built]
+- [Highlight 3 — e.g., your technical skills]
 
-I would love the opportunity to discuss how my technical skills align with engineering opportunities at {company_clean}. My resume is attached for your review.
+I would love the opportunity to discuss how my background aligns with the team at {company_clean}. My resume is attached for your review.
 
 Best regards,
-{s['name']}
-Phone    : +91 {s['phone']}
-LinkedIn : {s['linkedin']}
-GitHub   : {s['github']}
-LeetCode : {s['leetcode']}
-Email    : {s.get('email', '')}
-"""
+{s['name']}"""
+        # Append contact details only if provided
+        if s.get('phone'):
+            body += f"\nPhone    : {s['phone']}"
+        if s.get('linkedin'):
+            body += f"\nLinkedIn : {s['linkedin']}"
+        if s.get('github'):
+            body += f"\nGitHub   : {s['github']}"
+        if s.get('leetcode'):
+            body += f"\nLeetCode : {s['leetcode']}"
+        if s.get('email'):
+            body += f"\nEmail    : {s['email']}"
 
     return subject, body.strip()
