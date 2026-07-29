@@ -158,8 +158,7 @@ def parse_hr_email_list(
     total_emails_found = len(raw_entries)
     processed_contacts = []
     seen_emails = set()
-
-    valid_count = 0
+    candidate_contacts = []
     invalid_count = 0
     skipped_duplicates = 0
 
@@ -185,24 +184,44 @@ def parse_hr_email_list(
         comp = company.strip() if company and company.strip() else _domain_to_company(clean_email)
         name = hr_name.strip() if hr_name and hr_name.strip() else None
 
-        # Verify existence if enabled
-        status = "VALID"
-        reason = "Syntax valid"
-        if verify_existence:
-            v_res = verify_email_existence(comp, clean_email)
-            status = v_res.status
-            reason = v_res.reason
+        candidate_contacts.append((comp, name, clean_email))
 
-        if status == "INVALID":
-            invalid_count += 1
-        else:
+    valid_count = 0
+    processed_contacts = []
+
+    if verify_existence and candidate_contacts:
+        import concurrent.futures
+
+        def _verify_item(item):
+            comp, name, clean_email = item
+            v_res = verify_email_existence(comp, clean_email)
+            return (comp, name, clean_email, v_res.status, v_res.reason)
+
+        # Run up to 20 parallel network probes concurrently
+        with concurrent.futures.ThreadPoolExecutor(max_workers=20) as executor:
+            results = list(executor.map(_verify_item, candidate_contacts))
+
+        for comp, name, clean_email, status, reason in results:
+            if status == "INVALID":
+                invalid_count += 1
+            else:
+                valid_count += 1
+                processed_contacts.append({
+                    "company": comp,
+                    "hr_name": name,
+                    "email": clean_email,
+                    "status": status,
+                    "reason": reason
+                })
+    else:
+        for comp, name, clean_email in candidate_contacts:
             valid_count += 1
             processed_contacts.append({
                 "company": comp,
                 "hr_name": name,
                 "email": clean_email,
-                "status": status,
-                "reason": reason
+                "status": "VALID",
+                "reason": "Syntax valid"
             })
 
     stats = {

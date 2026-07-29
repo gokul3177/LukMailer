@@ -5,7 +5,7 @@ export default function ContactUpload({ onContactsParsed }) {
   const [loading, setLoading] = useState(false);
   const [parsedData, setParsedData] = useState(null);
   const [error, setError] = useState('');
-  const [verifyExistence, setVerifyExistence] = useState(true);
+  const [verifyExistence, setVerifyExistence] = useState(false);
 
   const handleFileChange = async (e) => {
     const file = e.target.files[0];
