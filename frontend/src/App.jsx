@@ -8,6 +8,7 @@ import LiveLogPanel from './components/LiveLogPanel';
 import ProgressBar from './components/ProgressBar';
 import SummaryModal from './components/SummaryModal';
 import { Play, Square, AlertCircle, Rocket } from 'lucide-react';
+import { apiUrl, sseUrl } from './api';
 
 export default function App() {
   const [apiConnected, setApiConnected] = useState(false);
@@ -43,7 +44,7 @@ export default function App() {
   // Connect to backend SSE Log Stream
   useEffect(() => {
     checkHealth();
-    const eventSource = new EventSource('/api/stream-logs');
+    const eventSource = new EventSource(sseUrl('/api/stream-logs'));
 
     eventSource.onmessage = (event) => {
       try {
@@ -86,7 +87,7 @@ export default function App() {
 
   const checkHealth = async () => {
     try {
-      const res = await fetch('/api/health');
+      const res = await fetch(apiUrl('/api/health'));
       if (res.ok) setApiConnected(true);
     } catch {
       setApiConnected(false);
@@ -152,7 +153,7 @@ export default function App() {
     formData.append('dry_run', dryRun);
 
     try {
-      const res = await fetch('/api/start-campaign', {
+      const res = await fetch(apiUrl('/api/start-campaign'), {
         method: 'POST',
         body: formData,
       });
@@ -169,7 +170,7 @@ export default function App() {
 
   const handleStopCampaign = async () => {
     try {
-      await fetch('/api/stop-campaign', { method: 'POST' });
+      await fetch(apiUrl('/api/stop-campaign'), { method: 'POST' });
       addLog('Cancellation requested by user...');
     } catch (err) {
       console.error(err);

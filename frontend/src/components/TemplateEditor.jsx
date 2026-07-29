@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Edit3, Eye, RotateCcw } from 'lucide-react';
+import { apiUrl } from '../api';
 
 export default function TemplateEditor({ customSubject, setCustomSubject, customBody, setCustomBody }) {
   const [activeTab, setActiveTab] = useState('edit');
@@ -32,7 +33,7 @@ Email    : gokulakannanbs31@gmail.com`;
 
   const fetchPreview = async () => {
     try {
-      const res = await fetch('/api/preview-email', {
+      const res = await fetch(apiUrl('/api/preview-email'), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

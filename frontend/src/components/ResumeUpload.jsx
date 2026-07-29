@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { FileUp, FileText, CheckCircle, AlertTriangle } from 'lucide-react';
+import { apiUrl } from '../api';
 
 export default function ResumeUpload({ onResumeParsed }) {
   const [loading, setLoading] = useState(false);
@@ -22,7 +23,7 @@ export default function ResumeUpload({ onResumeParsed }) {
     formData.append('file', file);
 
     try {
-      const res = await fetch('/api/parse-resume', {
+      const res = await fetch(apiUrl('/api/parse-resume'), {
         method: 'POST',
         body: formData,
       });

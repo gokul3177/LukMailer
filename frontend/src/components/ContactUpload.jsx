@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Users, FileSpreadsheet, AlertCircle } from 'lucide-react';
+import { apiUrl } from '../api';
 
 export default function ContactUpload({ onContactsParsed }) {
   const [loading, setLoading] = useState(false);
@@ -25,7 +26,7 @@ export default function ContactUpload({ onContactsParsed }) {
     formData.append('verify_existence', verifyExistence);
 
     try {
-      const res = await fetch('/api/parse-hr-list', {
+      const res = await fetch(apiUrl('/api/parse-hr-list'), {
         method: 'POST',
         body: formData,
       });
