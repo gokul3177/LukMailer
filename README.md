@@ -1,3 +1,13 @@
+---
+title: LukMailer Backend
+emoji: 🚀
+colorFrom: blue
+colorTo: indigo
+sdk: docker
+app_port: 8000
+pinned: false
+---
+
 # LukMailer — Personalized Recruiter Email Automation Platform
 
 **LukMailer** is a modern, lightweight bulk emailing platform built for job seekers to reach recruiters with personalized emails, PDF resume attachments, deep receiver email verification, and real-time live activity logging.
