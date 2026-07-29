@@ -13,8 +13,41 @@ from email.mime.multipart import MIMEMultipart
 from email.mime.base import MIMEBase
 from email import encoders
 
+import socket
 from backend.config import SMTP_HOST, SMTP_PORT, DELAY_MIN, DELAY_MAX, MAX_RETRIES
 from backend.logger import log
+
+def _create_ipv4_connection(address, timeout=20):
+    host, port = address
+    err = None
+    # Resolve specifically IPv4 (AF_INET) addresses to prevent [Errno 101] Network is unreachable on dual-stack environments without IPv6 routing (Render/Railway/Linux containers)
+    infos = socket.getaddrinfo(host, port, socket.AF_INET, socket.SOCK_STREAM)
+    for res in infos:
+        af, socktype, proto, canonname, sa = res
+        sock = None
+        try:
+            sock = socket.socket(af, socktype, proto)
+            sock.settimeout(timeout)
+            sock.connect(sa)
+            return sock
+        except socket.error as e:
+            err = e
+            if sock is not None:
+                sock.close()
+    if err is not None:
+        raise err
+    raise socket.error("Could not resolve or connect over IPv4")
+
+class IPv4SMTP_SSL(smtplib.SMTP_SSL):
+    def _get_socket(self, host, port, timeout):
+        new_socket = _create_ipv4_connection((host, port), timeout)
+        if self.context:
+            new_socket = self.context.wrap_socket(new_socket, server_hostname=self._host)
+        return new_socket
+
+class IPv4SMTP(smtplib.SMTP):
+    def _get_socket(self, host, port, timeout):
+        return _create_ipv4_connection((host, port), timeout)
 
 class CampaignCancelledException(Exception):
     """Raised when campaign execution is stopped by user."""
@@ -38,7 +71,7 @@ class GmailSender:
         attachments: list[dict] | None = None, # [{filename: str, content: bytes}]
     ) -> MIMEMultipart:
         msg = MIMEMultipart()
-        msg["From"] = f"{self.sender_name} <{self.address}>"
+        msg["From"] = f"{self.sender_name} <{self.address}>" if self.sender_name else self.address
         msg["To"] = to_email
         msg["Subject"] = subject
         msg.attach(MIMEText(body, "plain", "utf-8"))
@@ -65,7 +98,7 @@ class GmailSender:
         dry_run: bool = False,
     ) -> tuple[bool, str]:
         """
-        Send a single email. Returns (success_bool, status_message).
+        Send a single email with forced IPv4 & dual port fallback (465 SSL -> 587 STARTTLS).
         """
         msg = self._build_message(to_email, subject, body, attachments)
 
@@ -79,10 +112,22 @@ class GmailSender:
                 
             try:
                 ctx = ssl.create_default_context()
-                with smtplib.SMTP_SSL(SMTP_HOST, SMTP_PORT, context=ctx, timeout=20) as server:
-                    server.login(self.address, self.app_password)
-                    server.sendmail(self.address, to_email, msg.as_string())
-                return True, "SUCCESS"
+                # Attempt 1: Port 465 (SSL) over IPv4
+                try:
+                    with IPv4SMTP_SSL("smtp.gmail.com", 465, context=ctx, timeout=20) as server:
+                        server.login(self.address, self.app_password)
+                        server.sendmail(self.address, to_email, msg.as_string())
+                    return True, "SUCCESS"
+                except (OSError, smtplib.SMTPException) as ssl_err:
+                    # Attempt 2: Fallback to Port 587 (STARTTLS) over IPv4
+                    log.info(f"Port 465 SSL failed ({ssl_err}), trying Port 587 STARTTLS over IPv4...")
+                    with IPv4SMTP("smtp.gmail.com", 587, timeout=20) as server:
+                        server.ehlo_or_helo_if_needed()
+                        server.starttls(context=ctx)
+                        server.ehlo_or_helo_if_needed()
+                        server.login(self.address, self.app_password)
+                        server.sendmail(self.address, to_email, msg.as_string())
+                    return True, "SUCCESS"
             except smtplib.SMTPAuthenticationError as e:
                 err_msg = "Authentication failed: Invalid Gmail address or App Password."
                 log.error(f"❌ SMTP Auth Error: {err_msg}")
