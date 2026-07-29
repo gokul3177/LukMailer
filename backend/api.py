@@ -134,9 +134,17 @@ async def stream_logs():
             # Yield initial connection message
             yield f"data: {json.dumps({'type': 'connected', 'message': 'Live log stream active'})}\n\n"
             while True:
-                data = await q.get()
-                yield f"data: {json.dumps(data)}\n\n"
-        except asyncio.CancelledError:
+                try:
+                    data = await asyncio.wait_for(q.get(), timeout=30.0)
+                    yield f"data: {json.dumps(data)}\n\n"
+                except asyncio.TimeoutError:
+                    # Send a heartbeat comment to keep the connection alive
+                    yield ": heartbeat\n\n"
+        except (asyncio.CancelledError, GeneratorExit):
+            # Must re-raise CancelledError for anyio/starlette task group cleanup
+            raise
+        finally:
+            # Always clean up the subscriber queue on disconnect
             broadcaster.unsubscribe(q)
 
     return StreamingResponse(event_generator(), media_type="text/event-stream")
