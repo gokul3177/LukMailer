@@ -1,14 +1,5 @@
 /**
  * api.js — Centralised API base URL helper.
- *
- * During local development the backend runs on the same origin, so we use
- * relative paths (e.g. /api/health).
- *
- * When deployed with a split setup (Vercel frontend + Railway backend) set the
- * Vercel environment variable:
- *   VITE_API_URL = https://your-app.up.railway.app
- *
- * All fetch calls should import `apiUrl` from this file instead of hardcoding paths.
  */
 
 const BASE = import.meta.env.VITE_API_URL
@@ -31,4 +22,16 @@ export function apiUrl(path) {
  */
 export function sseUrl(path) {
   return `${BASE}${path}`;
+}
+
+/**
+ * Check if the backend API URL is configured or running on localhost.
+ * @returns {boolean}
+ */
+export function isApiConfigured() {
+  if (import.meta.env.VITE_API_URL) return true;
+  if (typeof window !== 'undefined' && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')) {
+    return true;
+  }
+  return false;
 }

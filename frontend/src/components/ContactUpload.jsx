@@ -31,10 +31,20 @@ export default function ContactUpload({ onContactsParsed }) {
         body: formData,
       });
 
-      const data = await res.json();
       if (!res.ok) {
-        throw new Error(data.detail || 'Failed to parse HR contacts file');
+        const text = await res.text();
+        try {
+          const errData = JSON.parse(text);
+          throw new Error(errData.detail || 'Failed to parse HR contacts file');
+        } catch {
+          if (res.status === 405 || text.includes('<!DOCTYPE')) {
+            throw new Error('Backend URL not connected! Please set VITE_API_URL in Vercel settings and Redeploy.');
+          }
+          throw new Error(`Server returned HTTP ${res.status}`);
+        }
       }
+
+      const data = await res.json();
 
       setParsedData(data);
       if (onContactsParsed) onContactsParsed(data.contacts, data.stats);

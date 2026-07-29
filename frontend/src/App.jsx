@@ -8,7 +8,7 @@ import LiveLogPanel from './components/LiveLogPanel';
 import ProgressBar from './components/ProgressBar';
 import SummaryModal from './components/SummaryModal';
 import { Play, Square, AlertCircle, Rocket } from 'lucide-react';
-import { apiUrl, sseUrl } from './api';
+import { apiUrl, sseUrl, isApiConfigured } from './api';
 
 export default function App() {
   const [apiConnected, setApiConnected] = useState(false);
@@ -180,6 +180,22 @@ export default function App() {
   return (
     <div className="app-container">
       <Header apiConnected={apiConnected} />
+
+      {!isApiConfigured() && (
+        <div style={{ background: '#fef2f2', border: '1px solid #fecaca', color: '#991b1b', padding: '1rem 1.25rem', borderRadius: '10px', marginBottom: '1.5rem', fontSize: '0.875rem', lineHeight: '1.5' }}>
+          <div style={{ fontWeight: 700, fontSize: '0.95rem', display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.375rem' }}>
+            <AlertCircle size={18} /> Backend API URL Missing (VITE_API_URL)
+          </div>
+          Your Vercel deployment is calling relative paths like <code>/api/...</code>, but Vercel cannot host the Python backend.
+          <br />
+          <strong>To fix this:</strong>
+          <ol style={{ marginLeft: '1.25rem', marginTop: '0.375rem' }}>
+            <li>Go to <strong>Vercel Dashboard → Project Settings → Environment Variables</strong></li>
+            <li>Add key <code>VITE_API_URL</code> with value <code>https://lukmailer.onrender.com</code> (your Render URL)</li>
+            <li>Go to <strong>Deployments</strong> tab → click <strong>...</strong> menu → select <strong>Redeploy</strong> (required to rebuild frontend JS bundle with the new URL)</li>
+          </ol>
+        </div>
+      )}
 
       <div className="grid-container">
         {/* Step 1 & Step 2 Row */}
